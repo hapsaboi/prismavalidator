@@ -1,32 +1,42 @@
-Introduction
-This npm package allows you to validate data against a Prisma model. You can specify which fields to omit from the validation and the package will check for missing required fields and invalid field types.
+# Prisma Validate
 
-Installation
-To install the package, run the following command:
-npm install prisma-validator
+Prisma Validate is a JavaScript library that allows you to easily validate your data against a Prisma schema. It helps you ensure that your data is consistent with the types and requirements defined in your Prisma schema, making it easier to prevent errors and improve the quality of your data.
 
-Usage
-To use the package, require it in your code and pass in the Prisma client, the model name, the data to be validated, and an array of fields to omit from the validation.
+## Installation
 
+install Prisma Validate, run the following command in your terminal:
+
+`npm install prisma-validate`
+
+## Usage/Examples
+
+To use Prisma Validate, you'll need to import the validateModel function and pass in your Prisma client instance, the name of the model you want to validate, and the data you want to validate. Optionally, you can also pass in an array of fields to omit from the validation process.
+
+```javascript
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-const prismaValidator = require("prisma-validator");
 
-const data = {
-amount: "10009a",
-description: "hansi",
-unitId: 1,
-termId: 2,
-date: "11/11/2011",
-};
+const { validateModel } = require("prisma-validate");
 
-const fieldsToOmit = ["id", "budgetRequestId", "createdAt", "date"];
-
-const validationResult = prismaValidator(
-prisma,
-"Expenditure",
-data,
-fieldsToOmit
+const result = validateModel(
+  prisma,
+  "User",
+  {
+    name: "John",
+    email: "john@example.com",
+    age: 30,
+  },
+  ["id"]
 );
+```
 
-console.log(validationResult);
+The validateModel function will return an object containing two keys: invalidFields and missingFields. invalidFields is an array of objects, each representing a field with an incorrect type. missingFields is an array of strings, representing the names of required fields that are missing in the data.
+
+```
+console.log(result);
+// {
+//   invalidFields: [],
+//   invalidFieldsArray: [],
+//   missingFields: []
+// }
+```
