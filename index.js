@@ -149,3 +149,5 @@ const validateModel = (
 
   return { invalidFields, invalidFieldsArray, missingFields };
 };
+
+module.exports = { validateModel };
