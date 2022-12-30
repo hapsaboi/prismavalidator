@@ -1,0 +1,108 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  firstname  String
+  lastname   String
+  email      String
+  password   String
+  type       String
+  status     String    @default("active")
+  Ministry   Ministry? @relation(fields: [ministryId], references: [id])
+  ministryId Int?      @unique
+}
+
+model Ministry {
+  id            Int             @id @default(autoincrement())
+  name          String          @unique
+  description   String
+  location      String
+  sector        String
+  User          User?
+  Departments   Department[]
+  BudgetRequest BudgetRequest[]
+}
+
+model Department {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String
+  createdAt   DateTime  @default(now())
+  Ministry    Ministry? @relation(fields: [ministryId], references: [id])
+  ministryId  Int
+  Units       Unit[]
+  Budget      Budget[]
+}
+
+model Unit {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  number       String        @unique
+  description  String
+  createdAt    DateTime      @default(now())
+  Department   Department?   @relation(fields: [departmentId], references: [id])
+  departmentId Int
+  Budget       Budget[]
+  Expenditure  Expenditure[]
+}
+
+model Term {
+  id            Int             @id @default(autoincrement())
+  name          String
+  year          Int
+  status        String          @default("inactive")
+  Budget        Budget[]
+  BudgetRequest BudgetRequest[]
+  Expenditure   Expenditure[]
+}
+
+model Budget {
+  id           Int        @id @default(autoincrement())
+  amount       Float
+  termId       Int
+  unitId       Int
+  departmentId Int
+  data         Json
+  status       String     @default("created")
+  Term         Term       @relation(fields: [termId], references: [id])
+  Unit         Unit       @relation(fields: [unitId], references: [id])
+  Department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+}
+
+model BudgetRequest {
+  id           Int           @id @default(autoincrement())
+  total_amount Float
+  termId       Int
+  ministryId   Int
+  status       String        @default("created")
+  Term         Term          @relation(fields: [termId], references: [id])
+  Ministry     Ministry      @relation(fields: [ministryId], references: [id])
+  Expenditure  Expenditure[]
+  createdAt    DateTime      @default(now())
+}
+
+model Expenditure {
+  id              Int           @id @default(autoincrement())
+  amount          Float
+  date            DateTime
+  description     String
+  termId          Int
+  unitId          Int
+  budgetRequestId Int
+  createdAt       DateTime      @default(now())
+  Term            Term          @relation(fields: [termId], references: [id])
+  Unit            Unit          @relation(fields: [unitId], references: [id])
+  BudgetRequest   BudgetRequest @relation(fields: [budgetRequestId], references: [id])
+}
