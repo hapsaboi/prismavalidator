@@ -1,7 +1,15 @@
+const { isValidDate } = require("./helper");
+
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-const validateModel = (prisma, modelName, data, fieldsToOmit) => {
+const validateModel = (
+  prisma,
+  modelName,
+  data,
+  fieldsToOmit,
+  configuration
+) => {
   // Get the model map from the _baseDmmf property
   const modelMap = prisma._baseDmmf.modelMap;
   // Get the model definition for the specified model
@@ -10,8 +18,9 @@ const validateModel = (prisma, modelName, data, fieldsToOmit) => {
   const missingFields = [];
   const invalidFields = [];
   const invalidFieldsArray = [];
-  // Omit the specified fields and relations from the model definition
+
   if (model) {
+    // Omit the specified fields and relations from the model definition
     if (model && fieldsToOmit) {
       model.fields = model.fields.filter(
         (field) => !fieldsToOmit.includes(field.name)
@@ -56,11 +65,8 @@ const validateModel = (prisma, modelName, data, fieldsToOmit) => {
       }
     } else if (expectedType === "date" || expectedType === "datetime") {
       // Check if the value is a valid ISO string
-      if (
-        !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(.\d{3})?Z$/.test(
-          data[field.name]
-        )
-      ) {
+      console.log(data[field.name]);
+      if (!isValidDate(data[field.name])) {
         invalidFields.push({
           model: modelName,
           fieldName: field.name,
@@ -82,20 +88,64 @@ const validateModel = (prisma, modelName, data, fieldsToOmit) => {
     }
   });
 
+  // Check for additional validation rules
+  // Loop through the configuration object
+  Object.entries(configuration).forEach(([fieldName, rules]) => {
+    // Get the value of the field in the data object
+    const fieldValue = data[fieldName];
+
+    // Define functions for each rule
+    const checkMinLength = () => {
+      if (fieldValue.length < rules.minLength) {
+        isValid = false;
+        invalidFields.push({
+          model: modelName,
+          fieldName,
+          error: `Field does not meet minimum length requirement of ${rules.minLength}`,
+        });
+      }
+      {
+        !invalidFieldsArray.includes(fieldName)
+          ? invalidFieldsArray.push(fieldName)
+          : null;
+      }
+    };
+    const checkMaxLength = () => {
+      if (fieldValue.length > rules.maxLength) {
+        isValid = false;
+        invalidFields.push({
+          model: modelName,
+          fieldName,
+          error: `Field exceeds maximum length of ${rules.maxLength}`,
+        });
+      }
+      {
+        !invalidFieldsArray.includes(fieldName)
+          ? invalidFieldsArray.push(fieldName)
+          : null;
+      }
+    };
+    const checkRegex = () => {
+      if (!new RegExp(rules.regex).test(fieldValue)) {
+        isValid = false;
+        invalidFields.push({
+          model: modelName,
+          fieldName,
+          error: `Field does not match required pattern`,
+        });
+      }
+      {
+        !invalidFieldsArray.includes(fieldName)
+          ? invalidFieldsArray.push(fieldName)
+          : null;
+      }
+    };
+
+    // Call the appropriate function for each rule
+    if (rules.minLength) checkMinLength();
+    if (rules.maxLength) checkMaxLength();
+    if (rules.regex) checkRegex();
+  });
+
   return { invalidFields, invalidFieldsArray, missingFields };
 };
-
-console.log(
-  validateModel(
-    prisma,
-    "Expenditure",
-    {
-      amount: "10009a",
-      description: "hansi",
-      unitId: 1,
-      termId: 2,
-      date: "11/11/2011",
-    },
-    ["id", "budgetRequestId", "createdAt", "date"]
-  )
-);

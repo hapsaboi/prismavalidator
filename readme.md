@@ -6,7 +6,9 @@ Prisma Validate is a JavaScript library that allows you to easily validate your 
 
 install Prisma Validate, run the following command in your terminal:
 
-`npm install prisma-validate`
+```javascript
+npm install prisma-validate
+```
 
 ## Usage/Examples
 
@@ -32,7 +34,7 @@ const result = validateModel(
 
 The validateModel function will return an object containing two keys: invalidFields and missingFields. invalidFields is an array of objects, each representing a field with an incorrect type. missingFields is an array of strings, representing the names of required fields that are missing in the data.
 
-```
+```javascript
 console.log(result);
 // {
 //   invalidFields: [],
@@ -40,3 +42,97 @@ console.log(result);
 //   missingFields: []
 // }
 ```
+
+## Custom Validation Rules
+
+You can specify custom validation rules by passing in an additional configuration object as the fourth parameter. This object should have keys that correspond to the field names in your model and values that are functions that return a boolean value.
+
+Note: The validateModel function currently only supports minLength and maxLength validation for string fields, and regex validation for any field type. More validation rules can be easily added as needed.
+
+```javascript
+const data = {
+  name: "John",
+  email: "john@example.com",
+  password: "password",
+};
+
+const configuration = {
+  name: {
+    minLength: 2,
+    maxLength: 50,
+    regex: "/^[A-Z]{3}$/",
+  },
+  email: {
+    minLength: 5,
+    maxLength: 50,
+  },
+  password: {
+    minLength: 8,
+    maxLength: 50,
+  },
+};
+
+const validationResult = validateModel(
+  prisma,
+  "User",
+  data,
+  ["id"],
+  configuration
+);
+```
+
+## Implementation
+
+```javascript
+const data = {
+  name: "Hanis",
+  email: "John@gmail.com",
+  password: "short",
+};
+
+const configuration = {
+  name: {
+    minLength: 10,
+    maxLength: 50,
+    regex: "/^[A-Z]{3}$/",
+  },
+  email: {
+    minLength: 20,
+    maxLength: 50,
+  },
+  password: {
+    minLength: 3,
+    maxLength: 50,
+  },
+};
+
+const result = validateModel(prisma, "User", data, configuration);
+
+console.log(result);
+
+Output:
+
+{
+  invalidFields: [
+    {
+      model: 'User',
+      fieldName: 'name',
+      error: 'Field does not match required pattern'
+    },
+    {
+      model: 'User',
+      fieldName: 'email',
+      error: 'Field does not meet minimum length requirement of 20'
+    }
+  ],
+  invalidFieldsArray: [ 'name', 'email', 'password' ],
+  missingFields: []
+}
+
+```
+
+## Author
+
+Hanis Hapsa
+
+- [@codehive](https://github.com/hapsaboi)
