@@ -1,6 +1,6 @@
 {
   "name": "prismavalidator",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "The validator function is a utility designed to ensure that the data being passed to the API endpoint conforms to the required format and data types. It checks for the presence of all required fields and verifies that the data types of these fields are correct. The validator function is particularly useful in preventing errors and ensuring the integrity of data being stored in the database. By implementing this function, you can guarantee that the API endpoint will only process data that meets the necessary standards, improving the reliability and robustness of your application.",
   "main": "index.js",
   "scripts": {
@@ -8,9 +8,8 @@
   },
   "keywords": [
     "Prisma",
-    "Validator",
-    "Prisma",
-    "Validator"
+    "Prisma Validator",
+    "Validate"
   ],
   "author": "Hanis Hapsa",
   "license": "ISC",

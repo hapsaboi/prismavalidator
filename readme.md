@@ -1,4 +1,4 @@
-# Prisma Validate
+# Prisma Validator
 
 Prisma Validate is a JavaScript library that allows you to easily validate your data against a Prisma schema. It helps you ensure that your data is consistent with the types and requirements defined in your Prisma schema, making it easier to prevent errors and improve the quality of your data.
 
@@ -7,18 +7,18 @@ Prisma Validate is a JavaScript library that allows you to easily validate your 
 install Prisma Validate, run the following command in your terminal:
 
 ```javascript
-npm install prismavalidate
+npm install prismavalidator
 ```
 
-## Installation
+## Arguments.
 
 The validate function takes in the following arguments:
 
 - prisma: an instance of the Prisma client, which allows us to access the data model definitions in the Prisma schema.
-  modelName: a string representing the name of the model we want to validate against.
+- modelName: a string representing the name of the model we want to validate against.
 - data: an object containing the data we want to validate. The keys in this object should match the field names in the specified model, and the values should be the data we want to validate.
 - fieldsToOmit (optional): an array of field names to omit from the validation process. This can be useful if you want to exclude certain fields from validation (e.g. createdAt, updatedAt).
-  configuration (optional): an object containing additional validation rules for specific fields. The keys in this object should match the field names in the specified model, and the values should be objects containing the following properties:
+- configuration (optional): an object containing additional validation rules for specific fields. The keys in this object should match the field names in the specified model, and the values should be objects containing the following properties:
   - minLength: the minimum allowed length for the field.
   - maxLength: the maximum allowed length for the field.
   - regex: a regular expression that the field must match.
@@ -31,6 +31,8 @@ The function returns an object with the following properties:
   - error: a string describing the validation error.
 - invalidFieldsArray: an array containing the names of the fields that failed validation.
 - missingFields: an array of field names that are required but were not present in the data object.
+- error: a string that return an error message that can be displayed to the user.
+- isValid: a boolean value that tells us if the validation was successful.
 
 ## Usage/Examples
 
@@ -43,13 +45,17 @@ const prisma = new PrismaClient();
 const { validateModel } = require("prisma-validate");
 
 const result = validateModel(
+  //instance of prisma
   prisma,
+  //name of model
   "User",
+  //data to validate
   {
     name: "John",
     email: "john@example.com",
     age: 30,
   },
+  //attributes to omit
   ["id"]
 );
 ```
@@ -62,6 +68,8 @@ console.log(result);
 //   invalidFields: [],
 //   invalidFieldsArray: [],
 //   missingFields: []
+//   error: ""
+//   isValid: bool
 // }
 ```
 
@@ -148,7 +156,9 @@ Output:
     }
   ],
   invalidFieldsArray: [ 'name', 'email', 'password' ],
-  missingFields: []
+  missingFields: [],
+  error: "Validation failed for the following field(s): firstname, lastname, type, ministryId, name",
+  isValid:false
 }
 
 ```
@@ -158,3 +168,8 @@ Output:
 Hanis Hapsa
 
 - [@codehive](https://github.com/hapsaboi)
+
+## Support
+
+To report any bug or suggest a feature update, kindly join the discord channel below.
+(https://discord.gg/kpyXeneeVq)

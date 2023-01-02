@@ -38,19 +38,12 @@ const validateModel = (
         missingFields.push(field);
       }
     });
-    if (missingFields.length > 0) {
-      console.error(
-        `The following required fields are missing in data: ${missingFields.join(
-          ", "
-        )}`
-      );
-    }
   } else {
     console.error(`Model ${modelName} not found in schema`);
     return `Error: model ${modelName} not found in schema`;
   }
   // Implement custom validation logic
-  model.fields.forEach((field) => {
+  (model.fields || []).forEach((field) => {
     const expectedType = field.type.toLowerCase();
     if (expectedType === "int" || expectedType === "float") {
       if (isNaN(data[field.name])) {
@@ -65,7 +58,7 @@ const validateModel = (
       }
     } else if (expectedType === "date" || expectedType === "datetime") {
       // Check if the value is a valid ISO string
-      console.log(data[field.name]);
+
       if (!isValidDate(data[field.name])) {
         invalidFields.push({
           model: modelName,
@@ -90,7 +83,7 @@ const validateModel = (
 
   // Check for additional validation rules
   // Loop through the configuration object
-  Object.entries(configuration).forEach(([fieldName, rules]) => {
+  Object.entries(configuration || []).forEach(([fieldName, rules]) => {
     // Get the value of the field in the data object
     const fieldValue = data[fieldName];
 
@@ -147,7 +140,25 @@ const validateModel = (
     if (rules.regex) checkRegex();
   });
 
-  return { invalidFields, invalidFieldsArray, missingFields };
+  let error = "";
+  let isValid = true;
+  if (missingFields.length > 0) {
+    error += `The following required field(s) are missing: ${missingFields.join(
+      ", "
+    )}. `;
+  }
+
+  if (invalidFieldsArray.length > 0) {
+    error += ` --- Validation failed for the following field(s): ${invalidFields
+      .map((error) => `${error.fieldName}`)
+      .join(", ")}`;
+  }
+
+  if (error !== "") {
+    isValid = false;
+  }
+
+  return { invalidFields, invalidFieldsArray, missingFields, error, isValid };
 };
 
 module.exports = { validateModel };
